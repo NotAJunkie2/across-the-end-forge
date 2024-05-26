@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_enderfly_essence": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "across_the_end:enderfly_essence"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "across_the_end:end_tear_from_blasting_enderfly_essence"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_enderfly_essence",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "across_the_end:end_tear_from_blasting_enderfly_essence"
+    ]
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "category": "misc",
+  "template": {
+    "item": "across_the_end:void_grasp_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "minecraft:diamond_pickaxe"
+  },
+  "addition": {
+    "item": "across_the_end:infused_amethyst_shard"
+  },
+  "result": {
+    "item": "across_the_end:amethyst_infused_diamond_pickaxe"
+  }
+}

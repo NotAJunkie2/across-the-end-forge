@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 320,
+  "experience": 2.5,
+  "group": "enderfly_essence",
+  "ingredient": {
+    "item": "across_the_end:enderfly_essence"
+  },
+  "result": "across_the_end:end_tear"
+}

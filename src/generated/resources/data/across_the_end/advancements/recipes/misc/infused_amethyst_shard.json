@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_infused_amethyst_shard": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "across_the_end:end_tear"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "across_the_end:infused_amethyst_shard"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_infused_amethyst_shard",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "across_the_end:infused_amethyst_shard"
+    ]
+  },
+  "sends_telemetry_event": false
+}

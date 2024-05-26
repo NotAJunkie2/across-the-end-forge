@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "across_the_end:item/amethyst_infused_diamond_shovel"
+  }
+}

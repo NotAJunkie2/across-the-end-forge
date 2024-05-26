@@ -1,0 +1,32 @@
+{
+  "item.across_the_end.enderfly_essence": "Enderfly's Essence",
+  "item.across_the_end.end_tear": "End Tear",
+  "item.across_the_end.infused_amethyst_shard": "Infused Amethyst Shard",
+
+  "item.across_the_end.enderfly_spawn_egg": "Enderfly Spawn Egg",
+
+  "item.across_the_end.amethyst_infused_diamond_sword": "Amethyst Infused Diamond Sword",
+  "item.across_the_end.amethyst_infused_diamond_pickaxe": "Amethyst Infused Diamond Pickaxe",
+  "item.across_the_end.amethyst_infused_diamond_axe": "Amethyst Infused Diamond Axe",
+  "item.across_the_end.amethyst_infused_diamond_shovel": "Amethyst Infused Diamond Shovel",
+  "item.across_the_end.amethyst_infused_diamond_hoe": "Amethyst Infused Diamond Hoe",
+
+  "item.across_the_end.amethyst_infused_netherite_sword": "Amethyst Infused Netherite Sword",
+  "item.across_the_end.amethyst_infused_netherite_pickaxe": "Amethyst Infused Netherite Pickaxe",
+  "item.across_the_end.amethyst_infused_netherite_axe": "Amethyst Infused Netherite Axe",
+  "item.across_the_end.amethyst_infused_netherite_shovel": "Amethyst Infused Netherite Shovel",
+  "item.across_the_end.amethyst_infused_netherite_hoe": "Amethyst Infused Netherite Hoe",
+
+  "item.across_the_end.dormant_void_grasp_upgrade_smithing_template": "Dormant Void Grasp Upgrade Smithing Template",
+  "item.across_the_end.void_grasp_upgrade_smithing_template": "Void Grasp Upgrade",
+
+  "upgrade.across_the_end.smithing_template.void_grasp_upgrade": "Void Grasp Upgrade",
+  "item.across_the_end.smithing_template.void_grasp_upgrade.applies_to": "Diamond & Netherite Tools",
+  "item.across_the_end.smithing_template.void_grasp_upgrade.ingredients": "Infused Amethyst Shard",
+  "item.across_the_end.smithing_template.void_grasp_upgrade.base_slot_description": "Diamond & Netherite Tools",
+  "item.across_the_end.smithing_template.void_grasp_upgrade.additions_slot_description": "Infused Amethyst Shard",
+
+  "block.across_the_end.testblock": "Testblock (Funny anvil sound)",
+
+  "creativetab.across_the_end_tab": "Across the End"
+}
