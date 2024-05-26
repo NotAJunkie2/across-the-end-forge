@@ -19,6 +19,7 @@ public class EnderflyModel<T extends Entity> extends HierarchicalModel<T> {
 	private final ModelPart body;
 	private final ModelPart right_wing;
 	private final ModelPart left_wing;
+	private float maxAnimationSpeed = 2.25f;
 
 	public EnderflyModel(ModelPart root) {
 		this.enderfly = root.getChild("enderfly");
@@ -54,8 +55,8 @@ public class EnderflyModel<T extends Entity> extends HierarchicalModel<T> {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		this.applyHeadRotation(netHeadYaw, headPitch, ageInTicks);
 
-		this.animateWalk(ModAnimationDefinitions.ENDERFLY_FLY, limbSwing, 0.25f, 0.25f, 1f);
-		this.animate(((EnderflyEntity) entity).flyAnimationState, ModAnimationDefinitions.ENDERFLY_FLY, ageInTicks, 0.25f);
+		this.animateWalk(ModAnimationDefinitions.ENDERFLY_FLY, limbSwing, limbSwingAmount, this.maxAnimationSpeed, 1f);
+		this.animate(((EnderflyEntity) entity).flyAnimationState, ModAnimationDefinitions.ENDERFLY_FLY, ageInTicks, this.maxAnimationSpeed);
 	}
 
 	private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {

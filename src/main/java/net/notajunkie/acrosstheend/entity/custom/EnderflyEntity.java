@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -35,14 +36,13 @@ public class EnderflyEntity extends Animal implements FlyingAnimal {
     }
 
     public final AnimationState flyAnimationState = new AnimationState();
-    private int idleAnimationTimeout = 0;
+    private final float maxAnimationSpeed = 2.25f;
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-        this.goalSelector.addGoal(4, new WaterAvoidingRandomFlyingGoal(this, 1.0D));
+        this.goalSelector.addGoal(5, new EnderflyEntity.RandomFloatAroundGoal(this));
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-//        this.goalSelector.addGoal(5, new EnderflyEntity.RandomFloatAroundGoal(this));
         this.goalSelector.addGoal(0, new TemptGoal(this, 1.25D, Ingredient.of(Items.CHORUS_FRUIT), false));
     }
 
@@ -62,7 +62,6 @@ public class EnderflyEntity extends Animal implements FlyingAnimal {
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
-
         public boolean canUse() {
             MoveControl movecontrol = this.enderfly.getMoveControl();
             if (!movecontrol.hasWanted()) {
@@ -76,11 +75,9 @@ public class EnderflyEntity extends Animal implements FlyingAnimal {
             }
         }
 
-
         public boolean canContinueToUse() {
             return false;
         }
-
 
         public void start() {
             RandomSource randomsource = this.enderfly.getRandom();
@@ -92,7 +89,7 @@ public class EnderflyEntity extends Animal implements FlyingAnimal {
     }
 
     @Override
-    public int getMaxSpawnClusterSize() { return 6; }
+    public int getMaxSpawnClusterSize() { return 4; }
 
     @Override
     public void tick() {
@@ -104,23 +101,13 @@ public class EnderflyEntity extends Animal implements FlyingAnimal {
     }
 
     private void setupAnimationStates() {
-        if (idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = this.random.nextInt(40) + 80;
-            this.flyAnimationState.start(this.tickCount);
-        } else {
-            --this.idleAnimationTimeout;
-        }
+        this.flyAnimationState.startIfStopped(this.tickCount);
     }
 
     @Override
     protected void updateWalkAnimation(float pPartialTick) {
-        float f;
-        if (this.getPose() == Pose.FALL_FLYING) {
-            f = Math.min(pPartialTick * 6f, 1f);
-        } else {
-            f = 0f;
-        }
-        this.flyAnimationState.updateTime(f, 0.2f);
+        float f = Math.min(pPartialTick * 6f, this.maxAnimationSpeed);
+        this.flyAnimationState.updateTime(f, this.maxAnimationSpeed);
     }
 
     @Nullable

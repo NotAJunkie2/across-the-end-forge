@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "chance": 0.12,
+          "condition": "minecraft:random_chance_with_looting",
+          "looting_multiplier": 0.02
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "across_the_end:enderfly_essence"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "across_the_end:entities/enderfly"
+}
