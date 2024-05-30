@@ -7,10 +7,11 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.notajunkie.acrosstheend.entity.ModEntities;
 import net.notajunkie.acrosstheend.entity.animations.ModAnimationDefinitions;
-import net.notajunkie.acrosstheend.entity.custom.EnderflyEntity;
+import net.notajunkie.acrosstheend.entity.custom.Enderfly;
 
 public class EnderflyModel<T extends Entity> extends HierarchicalModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
@@ -56,7 +57,7 @@ public class EnderflyModel<T extends Entity> extends HierarchicalModel<T> {
 		this.applyHeadRotation(netHeadYaw, headPitch, ageInTicks);
 
 		this.animateWalk(ModAnimationDefinitions.ENDERFLY_FLY, limbSwing, limbSwingAmount, this.maxAnimationSpeed, 1f);
-		this.animate(((EnderflyEntity) entity).flyAnimationState, ModAnimationDefinitions.ENDERFLY_FLY, ageInTicks, this.maxAnimationSpeed);
+		this.animate(((Enderfly) entity).flyAnimationState, ModAnimationDefinitions.ENDERFLY_FLY, ageInTicks, this.maxAnimationSpeed);
 	}
 
 	private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {

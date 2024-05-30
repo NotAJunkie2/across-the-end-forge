@@ -13,7 +13,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -86,10 +88,7 @@ public class ModEvents {
         if (!(killer instanceof Player)) {
             return;
         }
-        // Exit if killer is in creative mode
-        if (((Player) killer).isCreative()) {
-            return;
-        }
+
         // Exit if killer is not holding an amethyst infused weapon
         if (!(((Player) killer).getMainHandItem().is(ModTags.Items.AMETHYST_INFUSED_WEAPONS))) {
             return;
@@ -103,5 +102,37 @@ public class ModEvents {
         }
         // Clear drops
         event.getDrops().clear();
+    }
+
+    @SubscribeEvent
+    public static void onEntityKilled(LivingDeathEvent event) {
+        Entity killer = event.getSource().getEntity();
+        Entity victim = event.getEntity();
+        Level level = event.getEntity().level();
+        // Exit if killer is not a player
+        if (!(killer instanceof Player)) {
+            return;
+        }
+        // Exit if killer is not holding an amethyst infused weapon
+        if (!(((Player) killer).getMainHandItem().is(ModTags.Items.AMETHYST_INFUSED_WEAPONS))) {
+            return;
+        }
+        // Add xp
+        int xpDrop = event.getEntity().getExperienceReward();
+        // Spawn xp orb if xp drop is greater than 0
+        if (xpDrop > 0) {
+            level.addFreshEntity(new ExperienceOrb(level, killer.getX(), killer.getY(), killer.getZ(), xpDrop));
+        }
+    }
+
+    @SubscribeEvent
+    public static void  onExperienceDroppedOnDeath(LivingExperienceDropEvent event) {
+        if (!(event.getEntity().getLastAttacker() instanceof Player)) {
+            return;
+        }
+        if (!((Player) event.getEntity().getLastAttacker()).getMainHandItem().is(ModTags.Items.AMETHYST_INFUSED_WEAPONS)) {
+            return;
+        }
+        event.setDroppedExperience(0);
     }
 }

@@ -3,6 +3,8 @@ package net.notajunkie.acrosstheend.datagen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.notajunkie.acrosstheend.AcrossTheEnd;
@@ -25,16 +27,19 @@ public class ModItemTagGenerator extends ItemTagsProvider {
                 .add(ModItems.AMETHYST_INFUSED_DIAMOND_PICKAXE.get())
                 .add(ModItems.AMETHYST_INFUSED_DIAMOND_AXE.get())
                 .add(ModItems.AMETHYST_INFUSED_DIAMOND_SHOVEL.get())
-                .add(ModItems.AMETHYST_INFUSED_DIAMOND_HOE.get());
+                .add(ModItems.AMETHYST_INFUSED_DIAMOND_HOE.get())
+        ;
 
         this.tag(ModTags.Items.AMETHYST_INFUSED_NETHERITE_TOOLS)
                 .add(ModItems.AMETHYST_INFUSED_NETHERITE_PICKAXE.get())
                 .add(ModItems.AMETHYST_INFUSED_NETHERITE_AXE.get())
                 .add(ModItems.AMETHYST_INFUSED_NETHERITE_SHOVEL.get())
-                .add(ModItems.AMETHYST_INFUSED_NETHERITE_HOE.get());
+                .add(ModItems.AMETHYST_INFUSED_NETHERITE_HOE.get())
+        ;
 
         this.tag(ModTags.Items.AMETHYST_INFUSED_WEAPONS)
                 .add(ModItems.AMETHYST_INFUSED_NETHERITE_SWORD.get())
-                .add(ModItems.AMETHYST_INFUSED_DIAMOND_SWORD.get());
+                .add(ModItems.AMETHYST_INFUSED_DIAMOND_SWORD.get())
+        ;
     }
 }
