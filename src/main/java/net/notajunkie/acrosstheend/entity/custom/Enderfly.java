@@ -58,10 +58,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
     private static final int LIGHT_SOURCE_CLOSE_ENOUGH_DISTANCE = 2;
     private static final int PATHFIND_TO_LIGHT_SOURCE_WHEN_CLOSER_THAN = 16;
     private static final int LIGHT_SOURCE_SEARCH_DISTANCE = 20;
-    public static final String TAG_CROPS_GROWN_SINCE_POLLINATION = "CropsGrownSincePollination";
     public static final String TAG_CANNOT_ENTER_LIGHT_SOURCE_TICKS = "CannotEnterLightSourceTicks";
-    public static final String TAG_TICKS_SINCE_POLLINATION = "TicksSincePollination";
-    public static final String TAG_FLOWER_POS = "FlowerPos";
     public static final String TAG_LIGHT_SOURCE_POS = "LightSourcePos";
     int ticksWithoutNectarSinceExitingLightSource;
     private int stayOutOfLightSourceCountdown;
@@ -332,7 +329,10 @@ public class Enderfly extends Animal implements FlyingAnimal {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0D).add(Attributes.FLYING_SPEED, (double)0.6F).add(Attributes.MOVEMENT_SPEED, (double)0.3F).add(Attributes.ATTACK_DAMAGE, 2.0D).add(Attributes.FOLLOW_RANGE, 48.0D);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 6D)
+                .add(Attributes.FLYING_SPEED, (double)0.6F)
+                .add(Attributes.MOVEMENT_SPEED, (double)0.3F)
+                .add(Attributes.FOLLOW_RANGE, 48.0D);
     }
 
     protected PathNavigation createNavigation(Level pLevel) {
