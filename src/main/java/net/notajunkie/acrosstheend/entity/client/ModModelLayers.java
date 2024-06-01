@@ -7,6 +7,4 @@ import net.notajunkie.acrosstheend.AcrossTheEnd;
 public class ModModelLayers {
     public static final ModelLayerLocation ENDERFLY = new ModelLayerLocation(
             new ResourceLocation(AcrossTheEnd.MOD_ID, "enderfly_layer"), "main");
-
-
 }

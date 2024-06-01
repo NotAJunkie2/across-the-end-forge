@@ -1,0 +1,13 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": [
+    "minecraft:end_highlands",
+    "minecraft:end_midlands"
+  ],
+  "spawners": {
+    "type": "across_the_end:enderfly",
+    "maxCount": 8,
+    "minCount": 5,
+    "weight": 100
+  }
+}

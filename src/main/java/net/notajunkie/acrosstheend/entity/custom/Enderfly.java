@@ -56,7 +56,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
     private static final int LIGHT_SOURCE_CLOSE_ENOUGH_DISTANCE = 2;
     private static final int PATHFIND_TO_LIGHT_SOURCE_WHEN_CLOSER_THAN = 16;
     private static final int LIGHT_SOURCE_SEARCH_DISTANCE = 20;
-    public static final int TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE = 160;
+    public static final int TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE = 200;
     public static final String TAG_CANNOT_ENTER_LIGHT_SOURCE_TICKS = "CannotEnterLightSourceTicks";
     public static final String TAG_LIGHT_SOURCE_POS = "LightSourcePos";
     int ticksWithoutNectarSinceExitingLightSource;
@@ -128,7 +128,9 @@ public class Enderfly extends Animal implements FlyingAnimal {
         super.tick();
         if (this.random.nextFloat() < 0.05F) {
             for(int i = 0; i < this.random.nextInt(2) + 1; ++i) {
-                this.spawnPortalParticle(this.level(), this.getX() - (double)0.3F, this.getX() + (double)0.3F, this.getZ() - (double)0.3F, this.getZ() + (double)0.3F, this.getY(0.5D), ParticleTypes.PORTAL);
+                this.spawnPortalParticle(this.level(), this.getX() - (double)0.3F,
+                        this.getX() + (double)0.3F, this.getZ() - (double)0.3F,
+                        this.getZ() + (double)0.3F, this.getY(0.25D), ParticleTypes.PORTAL);
             }
         }
 
@@ -452,6 +454,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
         private boolean hasReachedTarget(BlockPos pPos) {
             if (Enderfly.this.closerThan(pPos, 2)) {
+                System.getLogger("Enderfly").log(System.Logger.Level.INFO, "Reached target");
                 return true;
             } else {
                 Path path = Enderfly.this.navigation.getPath();
@@ -490,6 +493,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
 
                 if (canReach) {
+                    System.getLogger("Enderfly").log(System.Logger.Level.INFO, "Can reach source at " + pPos);
                     if (index != -1) {
                         // If there is more than one valid hive, choose the closest one
                         if (Enderfly.this.blockPosition().distSqr(list.get(i)) < Enderfly.this.blockPosition().distSqr(list.get(index))) {
@@ -504,6 +508,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
             if (index != -1) {
                 Enderfly.this.lightSourceBlockPos = list.get(index);
+                System.getLogger("Enderfly").log(System.Logger.Level.INFO, "Source found at " + Enderfly.this.lightSourceBlockPos);
                 Enderfly.this.navigation.moveTo(Enderfly.this.lightSourceBlockPos.getX(), Enderfly.this.lightSourceBlockPos.getY(), Enderfly.this.lightSourceBlockPos.getZ(), 1.0D);
             }
         }
