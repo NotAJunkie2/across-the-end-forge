@@ -6,8 +6,8 @@
   ],
   "spawners": {
     "type": "across_the_end:enderfly",
-    "maxCount": 8,
+    "maxCount": 15,
     "minCount": 5,
-    "weight": 100
+    "weight": 50
   }
 }

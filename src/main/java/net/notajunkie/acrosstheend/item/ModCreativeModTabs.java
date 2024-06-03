@@ -40,6 +40,11 @@ public class ModCreativeModTabs {
                 pOutput.accept(ModItems.AMETHYST_INFUSED_NETHERITE_SHOVEL.get());
                 pOutput.accept(ModItems.AMETHYST_INFUSED_NETHERITE_HOE.get());
 
+                // Ranged weapons
+                pOutput.accept(ModItems.AMETHYST_INFUSED_BOW.get());
+                pOutput.accept(ModItems.AMETHYST_INFUSED_CROSSBOW.get());
+
+                // Spawn eggs
                 pOutput.accept(ModItems.ENDERFLY_SPAWN_EGG.get());
 
                 // Blocks

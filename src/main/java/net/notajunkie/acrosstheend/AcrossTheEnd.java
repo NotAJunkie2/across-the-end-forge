@@ -16,6 +16,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.notajunkie.acrosstheend.block.ModBlocks;
 import net.notajunkie.acrosstheend.entity.client.EnderflyRenderer;
 import net.notajunkie.acrosstheend.item.ModCreativeModTabs;
+import net.notajunkie.acrosstheend.item.ModItemProperties;
 import net.notajunkie.acrosstheend.item.ModItems;
 import net.notajunkie.acrosstheend.entity.ModEntities;
 import org.slf4j.Logger;
@@ -64,6 +65,8 @@ public class AcrossTheEnd {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
+            ModItemProperties.addCustomItemProperties();
+
             EntityRenderers.register(ModEntities.ENDERFLY.get(), EnderflyRenderer::new);
         }
     }

@@ -22,9 +22,9 @@ public class ModBiomeModifiers {
         var biomes = context.lookup(Registries.BIOME);
 
         context.register(SPAWN_ENDERFLY, new ForgeBiomeModifiers.AddSpawnsBiomeModifier(
-                // Spawn only in the end highlands
+                // Spawn only in the end highlands and midlands
                 HolderSet.direct(biomes.getOrThrow(Biomes.END_HIGHLANDS), biomes.getOrThrow(Biomes.END_MIDLANDS)),
-                List.of(new MobSpawnSettings.SpawnerData(ModEntities.ENDERFLY.get(), 100, 5, 8))));
+                List.of(new MobSpawnSettings.SpawnerData(ModEntities.ENDERFLY.get(), 50, 5, 15))));
     }
 
     private static ResourceKey<BiomeModifier> registerKey(String name) {

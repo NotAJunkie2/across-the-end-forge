@@ -1,0 +1,38 @@
+{
+  "parent": "across_the_end:across_the_end",
+  "criteria": {
+    "obtain_void_grasp_upgrade": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "across_the_end:dormant_void_grasp_upgrade_smithing_template"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.nap_time_description"
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "item": "across_the_end:void_grasp_upgrade_smithing_template"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.nap_time_title"
+    }
+  },
+  "requirements": [
+    [
+      "obtain_void_grasp_upgrade"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

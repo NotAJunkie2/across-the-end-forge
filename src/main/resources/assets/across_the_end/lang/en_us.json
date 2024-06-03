@@ -17,16 +17,25 @@
   "item.across_the_end.amethyst_infused_netherite_shovel": "Amethyst Infused Netherite Shovel",
   "item.across_the_end.amethyst_infused_netherite_hoe": "Amethyst Infused Netherite Hoe",
 
+  "item.across_the_end.amethyst_infused_bow": "Amethyst Infused Bow",
+  "item.across_the_end.amethyst_infused_crossbow": "Amethyst Infused Crossbow",
+
   "item.across_the_end.dormant_void_grasp_upgrade_smithing_template": "Dormant Smithing Template",
   "item.across_the_end.void_grasp_upgrade_smithing_template": "Void Grasp Upgrade",
 
   "upgrade.across_the_end.smithing_template.void_grasp_upgrade": "Void Grasp Upgrade",
-  "item.across_the_end.smithing_template.void_grasp_upgrade.applies_to": "Diamond & Netherite Tools",
+  "item.across_the_end.smithing_template.void_grasp_upgrade.applies_to": "Diamond & Netherite Tools and Weapons",
   "item.across_the_end.smithing_template.void_grasp_upgrade.ingredients": "Infused Amethyst Shard",
-  "item.across_the_end.smithing_template.void_grasp_upgrade.base_slot_description": "Diamond & Netherite Tools",
+  "item.across_the_end.smithing_template.void_grasp_upgrade.base_slot_description": "Diamond & Netherite Tools and Weapons",
   "item.across_the_end.smithing_template.void_grasp_upgrade.additions_slot_description": "Infused Amethyst Shard",
 
   "block.across_the_end.testblock": "Testblock (Funny anvil sound)",
+
+  "advancement.root_title": "Across the End",
+  "advancement.root_description": "Acquire an Enderfly's Essence to begin your journey across the End",
+
+  "advancement.nap_time_title": "Nap time is over!",
+  "advancement.nap_time_description": "Awaken a dormant smithing template",
 
   "creativetab.across_the_end_tab": "Across the End"
 }

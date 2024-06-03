@@ -1,0 +1,6 @@
+{
+    "parent": "item/bow",
+    "textures": {
+        "layer0": "across_the_end:item/amethyst_infused_bow_pulling_2"
+    }
+}

@@ -89,6 +89,13 @@ public class ModItems {
                     .fireResistant()
             )
     );
+    // Amethyst infused ranged weapons
+    public static final RegistryObject<Item> AMETHYST_INFUSED_BOW = ITEMS.register(
+            "amethyst_infused_bow", () -> new BowItem(new Item.Properties().durability(480))
+    );
+    public static final RegistryObject<Item> AMETHYST_INFUSED_CROSSBOW = ITEMS.register(
+            "amethyst_infused_crossbow", () -> new CrossbowItem(new Item.Properties().durability(408))
+    );
 
     // Spawn eggs
     public static final RegistryObject<SpawnEggItem> ENDERFLY_SPAWN_EGG = ITEMS.register(

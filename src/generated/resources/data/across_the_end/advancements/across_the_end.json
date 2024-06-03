@@ -1,0 +1,38 @@
+{
+  "criteria": {
+    "has_enderfly_essence": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "across_the_end:enderfly_essence"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "background": "minecraft:textures/block/end_stone.png",
+    "description": {
+      "translate": "advancement.root_description"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "across_the_end:enderfly_essence"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.root_title"
+    }
+  },
+  "requirements": [
+    [
+      "has_enderfly_essence"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
