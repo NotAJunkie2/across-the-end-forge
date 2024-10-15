@@ -1,6 +1,11 @@
 package net.notajunkie.acrosstheend.event;
 
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -24,6 +29,7 @@ import net.notajunkie.acrosstheend.item.ModItems;
 import net.notajunkie.acrosstheend.util.ModTags;
 
 import java.util.List;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = AcrossTheEnd.MOD_ID)
 public class ModEvents {
@@ -31,6 +37,9 @@ public class ModEvents {
     public static void anvilEvent(AnvilUpdateEvent event) {
         ItemStack left = event.getLeft();
         ItemStack right = event.getRight();
+        Player player = event.getPlayer();
+        MinecraftServer server = player.level().getServer();
+
         if (left.is(ModItems.DORMANT_VOID_GRASP_UPGRADE_SMITHING_TEMPLATE.get()) && right.is(ModItems.ENDERFLY_ESSENCE.get())
                 && right.getCount() >= 4) {
             ItemStack output = new ItemStack(ModItems.VOID_GRASP_UPGRADE_SMITHING_TEMPLATE.get(), 1);

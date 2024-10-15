@@ -2,7 +2,6 @@ package net.notajunkie.acrosstheend.entity.custom;
 
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -12,7 +11,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.damagesource.DamageSource;
@@ -50,32 +48,27 @@ public class Enderfly extends Animal implements FlyingAnimal {
             Blocks.SHROOMLIGHT, Blocks.GLOWSTONE, Blocks.LANTERN, Blocks.SEA_LANTERN, Blocks.END_ROD
     );
     public final AnimationState flyAnimationState = new AnimationState();
-    private final float maxAnimationSpeed = 2.25f;
+    private static final float maxAnimationSpeed = 2.25f;
+
     private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Enderfly.class, EntityDataSerializers.BYTE);
-    private static final int TOO_FAR_DISTANCE = 32;
-    private static final int LIGHT_SOURCE_CLOSE_ENOUGH_DISTANCE = 2;
-    private static final int PATHFIND_TO_LIGHT_SOURCE_WHEN_CLOSER_THAN = 16;
-    private static final int LIGHT_SOURCE_SEARCH_DISTANCE = 20;
     public static final int TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE = 200;
-    public static final String TAG_CANNOT_ENTER_LIGHT_SOURCE_TICKS = "CannotEnterLightSourceTicks";
     public static final String TAG_LIGHT_SOURCE_POS = "LightSourcePos";
-    int ticksWithoutNectarSinceExitingLightSource;
+    public static final String TAG_CANNOT_GO_TO_LIGHT_SOURCE_TICKS = "CannotGoToLightSourceTicks";
     private int stayOutOfLightSourceCountdown;
     int remainingCooldownBeforeLocatingNewLightSource;
-    BlockPos savedFlowerPos;
+    BlockPos savedLightSourceBlockPos;
     @Nullable
-    BlockPos lightSourceBlockPos;
-    Enderfly.EnderflyGoToLightSourceGoal goToLightSourceGoal;
+    EnderflyGoToLightSourceGoal goToLightSourceGoal;
     private int underWaterTicks;
 
     public Enderfly(EntityType<? extends Enderfly> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new FlyingMoveControl(this, 20, true);
         this.lookControl = new EnderflyLookControl(this);
+        // Can live in End dimension
+
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 16.0F);
-        this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0F);
-        this.setPathfindingMalus(BlockPathTypes.FENCE, -1.0F);
     }
 
     protected void defineSynchedData() {
@@ -91,37 +84,30 @@ public class Enderfly extends Animal implements FlyingAnimal {
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(Items.CHORUS_FRUIT), false));
         this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.25D));
-        this.goalSelector.addGoal(5, new Enderfly.EnderflyLocateLightSourceGoal());
-        this.goToLightSourceGoal = new Enderfly.EnderflyGoToLightSourceGoal();
-        this.goalSelector.addGoal(5, this.goToLightSourceGoal);
-        this.goalSelector.addGoal(8, new Enderfly.EnderflyWanderGoal());
+        this.goalSelector.addGoal(5, new EnderflyLocateLightSourceGoal());
+        this.goToLightSourceGoal = new EnderflyGoToLightSourceGoal();
+        this.goalSelector.addGoal(4, this.goToLightSourceGoal);
+        this.goalSelector.addGoal(8, new EnderflyWanderGoal());
         this.goalSelector.addGoal(9, new FloatGoal(this));
     }
 
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         if (this.hasLightSource()) {
-            pCompound.put("LightSourcePos", NbtUtils.writeBlockPos(this.getLightSourcePos()));
+            pCompound.put(TAG_LIGHT_SOURCE_POS, NbtUtils.writeBlockPos(this.getLightSourcePos()));
         }
 
-        pCompound.putInt("TicksSincePollination", this.ticksWithoutNectarSinceExitingLightSource);
-        pCompound.putInt("CannotEnterLightSourceTicks", this.stayOutOfLightSourceCountdown);
+        pCompound.putInt(TAG_CANNOT_GO_TO_LIGHT_SOURCE_TICKS, this.stayOutOfLightSourceCountdown);
     }
 
     public void readAdditionalSaveData(CompoundTag pCompound) {
-        this.lightSourceBlockPos = null;
-        if (pCompound.contains("LightSourcePos")) {
-            this.lightSourceBlockPos = NbtUtils.readBlockPos(pCompound.getCompound("LightSourcePos"));
-        }
-
-        this.savedFlowerPos = null;
-        if (pCompound.contains("FlowerPos")) {
-            this.savedFlowerPos = NbtUtils.readBlockPos(pCompound.getCompound("FlowerPos"));
+        this.savedLightSourceBlockPos = null;
+        if (pCompound.contains(TAG_LIGHT_SOURCE_POS)) {
+            this.savedLightSourceBlockPos = NbtUtils.readBlockPos(pCompound.getCompound(TAG_LIGHT_SOURCE_POS));
         }
 
         super.readAdditionalSaveData(pCompound);
-        this.ticksWithoutNectarSinceExitingLightSource = pCompound.getInt("TicksSincePollination");
-        this.stayOutOfLightSourceCountdown = pCompound.getInt("CannotEnterLightSourceTicks");
+        this.stayOutOfLightSourceCountdown = pCompound.getInt(TAG_CANNOT_GO_TO_LIGHT_SOURCE_TICKS);
     }
 
     public void tick() {
@@ -130,7 +116,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
             for(int i = 0; i < this.random.nextInt(2) + 1; ++i) {
                 this.spawnPortalParticle(this.level(), this.getX() - (double)0.3F,
                         this.getX() + (double)0.3F, this.getZ() - (double)0.3F,
-                        this.getZ() + (double)0.3F, this.getY(0.25D), ParticleTypes.PORTAL);
+                        this.getZ() + (double)0.3F, this.getY(0.25D));
             }
         }
 
@@ -145,12 +131,12 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
     @Override
     protected void updateWalkAnimation(float pPartialTick) {
-        float f = Math.min(pPartialTick * 6f, this.maxAnimationSpeed);
-        this.flyAnimationState.updateTime(f, this.maxAnimationSpeed);
+        float f = Math.min(pPartialTick * 6f, maxAnimationSpeed);
+        this.flyAnimationState.updateTime(f, maxAnimationSpeed);
     }
 
-    private void spawnPortalParticle(Level pLevel, double pStartX, double pEndX, double pStartZ, double pEndZ, double pPosY, ParticleOptions pParticleOption) {
-        pLevel.addParticle(pParticleOption, Mth.lerp(pLevel.random.nextDouble(), pStartX, pEndX), pPosY, Mth.lerp(pLevel.random.nextDouble(), pStartZ, pEndZ), 0.0D, 0.0D, 0.0D);
+    private void spawnPortalParticle(Level pLevel, double pStartX, double pEndX, double pStartZ, double pEndZ, double pPosY) {
+        pLevel.addParticle(ParticleTypes.PORTAL, Mth.lerp(pLevel.random.nextDouble(), pStartX, pEndX), pPosY, Mth.lerp(pLevel.random.nextDouble(), pStartZ, pEndZ), 0.0D, 0.0D, 0.0D);
     }
 
     void pathfindRandomlyTowards(BlockPos pPos) {
@@ -158,6 +144,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
         int i = 0;
         BlockPos blockpos = this.blockPosition();
         int j = (int)vec3.y - blockpos.getY();
+
         if (j > 2) {
             i = 4;
         } else if (j < -2) {
@@ -184,20 +171,8 @@ public class Enderfly extends Animal implements FlyingAnimal {
         return this.goToLightSourceGoal.travellingTicks;
     }
 
-    private boolean isTiredOfLookingForNectar() {
-        return this.ticksWithoutNectarSinceExitingLightSource > 3600;
-    }
-
     boolean wantsToGoToALightSource() {
-        if (this.stayOutOfLightSourceCountdown <= 0 && this.getTarget() == null) {
-            return this.isTiredOfLookingForNectar() || this.level().isRaining() || this.level().isNight();
-        } else {
-            return false;
-        }
-    }
-
-    public void setStayOutOfLightSourceCountdown(int pStayOutOfLightSourceCountdown) {
-        this.stayOutOfLightSourceCountdown = pStayOutOfLightSourceCountdown;
+        return this.stayOutOfLightSourceCountdown <= 0 && this.getTarget() == null;
     }
 
     protected void customServerAiStep() {
@@ -206,25 +181,21 @@ public class Enderfly extends Animal implements FlyingAnimal {
         } else {
             this.underWaterTicks = 0;
         }
-
-        if (this.underWaterTicks > 20) {
-            this.hurt(this.damageSources().drown(), 1.0F);
+//
+        if (this.underWaterTicks > 10) {
+            this.hurt(this.damageSources().drown(), 0.5F);
         }
-    }
-
-    public void resetTicksWithoutNectarSinceExitingLightSource() {
-        this.ticksWithoutNectarSinceExitingLightSource = 0;
     }
 
     @VisibleForDebug
     public boolean hasLightSource() {
-        return this.lightSourceBlockPos != null;
+        return this.savedLightSourceBlockPos != null;
     }
 
     @Nullable
     @VisibleForDebug
     public BlockPos getLightSourcePos() {
-        return this.lightSourceBlockPos;
+        return this.savedLightSourceBlockPos;
     }
 
     @VisibleForDebug
@@ -249,7 +220,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
             boolean flag = this.getTarget() != null && this.getTarget().distanceToSqr(this) < 4.0D;
             if (this.tickCount % 20 == 0 && !this.isLightSourceValid()) {
-                this.lightSourceBlockPos = null;
+                this.savedLightSourceBlockPos = null;
             }
         }
 
@@ -258,12 +229,13 @@ public class Enderfly extends Animal implements FlyingAnimal {
     boolean isLightSourceValid() {
         if (!this.hasLightSource()) {
             return false;
-        } else if (this.isTooFarAway(this.lightSourceBlockPos)) {
+        } else if (this.isTooFarAway(this.savedLightSourceBlockPos)) {
             return false;
         } else {
-            BlockState blockState = this.level().getBlockState(this.lightSourceBlockPos);
+            assert this.savedLightSourceBlockPos != null;
+            BlockState blockState = this.level().getBlockState(this.savedLightSourceBlockPos);
             // Is in LIGHT_SOURCES
-            return LIGHT_SOURCES.contains(blockState);
+            return LIGHT_SOURCES.contains(blockState.getBlock());
         }
     }
 
@@ -286,8 +258,8 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 6D)
-                .add(Attributes.FLYING_SPEED, (double)0.6F)
-                .add(Attributes.MOVEMENT_SPEED, (double)0.3F)
+                .add(Attributes.FLYING_SPEED, 0.6F)
+                .add(Attributes.MOVEMENT_SPEED, 0.3F)
                 .add(Attributes.FOLLOW_RANGE, 48.0D);
     }
 
@@ -308,22 +280,22 @@ public class Enderfly extends Animal implements FlyingAnimal {
     }
 
     public boolean isFood(ItemStack pStack) {
-        return pStack.is(Items.CHORUS_FRUIT);
+        return pStack.is(Items.POPPED_CHORUS_FRUIT);
     }
 
     protected void playStepSound(BlockPos pPos, BlockState pBlock) {
     }
 
     protected SoundEvent getAmbientSound() {
-        return null;
+        return SoundEvents.ENDERMITE_AMBIENT;
     }
 
     protected SoundEvent getHurtSound(DamageSource pDamageSource) {
-        return SoundEvents.BEE_HURT;
+        return SoundEvents.ENDERMAN_TELEPORT;
     }
 
     protected SoundEvent getDeathSound() {
-        return SoundEvents.BEE_DEATH;
+        return SoundEvents.ENDERMITE_DEATH;
     }
 
     protected float getSoundVolume() {
@@ -355,11 +327,11 @@ public class Enderfly extends Animal implements FlyingAnimal {
     }
 
     public MobType getMobType() {
-        return MobType.ARTHROPOD;
+        return MobType.UNDEFINED;
     }
 
     boolean closerThan(BlockPos pPos, int pDistance) {
-        return pPos.closerThan(this.blockPosition(), (double)pDistance);
+        return pPos.closerThan(this.blockPosition(), pDistance);
     }
 
     abstract class BaseEnderflyGoal extends Goal {
@@ -377,20 +349,23 @@ public class Enderfly extends Animal implements FlyingAnimal {
     }
 
     @VisibleForDebug
-    public class EnderflyGoToLightSourceGoal extends Enderfly.BaseEnderflyGoal {
-        public static final int MAX_TRAVELLING_TICKS = 600;
-        int travellingTicks = Enderfly.this.level().random.nextInt(10);
+    public class EnderflyGoToLightSourceGoal extends BaseEnderflyGoal {
+        public static final int MAX_TRAVELLING_TICKS = 100;
+        public static final int LIGHT_SOURCE_CLOSE_ENOUGH_DISTANCE = 2;
+
+        int travellingTicks = Enderfly.this.level().random.nextIntBetweenInclusive(40, MAX_TRAVELLING_TICKS);
         @Nullable
         private Path lastPath;
-        private static final int TICKS_BEFORE_LIGHT_SOURCE_DROP = 60;
         private int ticksStuck;
 
         EnderflyGoToLightSourceGoal() {
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+            this.setFlags(EnumSet.of(Flag.MOVE));
         }
 
         public boolean canEnderflyUse() {
-            return Enderfly.this.lightSourceBlockPos != null && !Enderfly.this.hasRestriction() && Enderfly.this.wantsToGoToALightSource() && !this.hasReachedTarget(Enderfly.this.lightSourceBlockPos) && Enderfly.this.level().getBlockState(Enderfly.this.lightSourceBlockPos).is(BlockTags.BEEHIVES);
+            return Enderfly.this.savedLightSourceBlockPos != null && !Enderfly.this.hasRestriction()
+                    && Enderfly.this.wantsToGoToALightSource() && !this.hasReachedTarget(Enderfly.this.savedLightSourceBlockPos)
+                    && LIGHT_SOURCES.contains(Enderfly.this.level().getBlockState(Enderfly.this.savedLightSourceBlockPos).getBlock());
         }
 
         public boolean canEnderflyContinueToUse() {
@@ -411,22 +386,22 @@ public class Enderfly extends Animal implements FlyingAnimal {
         }
 
         public void tick() {
-            if (Enderfly.this.lightSourceBlockPos != null) {
+            if (Enderfly.this.savedLightSourceBlockPos != null) {
                 ++this.travellingTicks;
                 if (Enderfly.this.navigation.isInProgress()) {
                     return;
                 }
 
-                if (!Enderfly.this.closerThan(Enderfly.this.lightSourceBlockPos, 16)) {
-                    if (Enderfly.this.isTooFarAway(Enderfly.this.lightSourceBlockPos)) {
+                if (!Enderfly.this.closerThan(Enderfly.this.savedLightSourceBlockPos, 16)) {
+                    if (Enderfly.this.isTooFarAway(Enderfly.this.savedLightSourceBlockPos)) {
                         this.dropLightSource();
                     } else {
-                        Enderfly.this.pathfindRandomlyTowards(Enderfly.this.lightSourceBlockPos);
+                        Enderfly.this.pathfindRandomlyTowards(Enderfly.this.savedLightSourceBlockPos);
                     }
                     return;
                 }
 
-                boolean flag = this.pathfindDirectlyTowards(Enderfly.this.lightSourceBlockPos);
+                boolean flag = this.pathfindDirectlyTowards(Enderfly.this.savedLightSourceBlockPos);
                 if (!flag) {
                     this.dropLightSource();
                 } else if (this.lastPath != null && Enderfly.this.navigation.getPath().sameAs(this.lastPath)) {
@@ -443,18 +418,17 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
         private boolean pathfindDirectlyTowards(BlockPos pPos) {
             Enderfly.this.navigation.setMaxVisitedNodesMultiplier(10.0F);
-            Enderfly.this.navigation.moveTo((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ(), 1.0D);
+            Enderfly.this.navigation.moveTo(pPos.getX(), pPos.getY(), pPos.getZ(), 1.0D);
             return Enderfly.this.navigation.getPath() != null && Enderfly.this.navigation.getPath().canReach();
         }
 
         private void dropLightSource() {
-            Enderfly.this.lightSourceBlockPos = null;
+            Enderfly.this.savedLightSourceBlockPos = null;
             Enderfly.this.remainingCooldownBeforeLocatingNewLightSource = Enderfly.TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE;
         }
 
         private boolean hasReachedTarget(BlockPos pPos) {
-            if (Enderfly.this.closerThan(pPos, 2)) {
-                System.getLogger("Enderfly").log(System.Logger.Level.INFO, "Reached target");
+            if (Enderfly.this.closerThan(pPos, LIGHT_SOURCE_CLOSE_ENOUGH_DISTANCE)) {
                 return true;
             } else {
                 Path path = Enderfly.this.navigation.getPath();
@@ -463,8 +437,9 @@ public class Enderfly extends Animal implements FlyingAnimal {
         }
     }
 
-    class EnderflyLocateLightSourceGoal extends Enderfly.BaseEnderflyGoal {
-        private static final int MAX_LOCATE_DISTANCE = 20;
+    class EnderflyLocateLightSourceGoal extends BaseEnderflyGoal {
+        private static final int MAX_LOCATE_RADIUS = 16;
+
         public boolean canEnderflyUse() {
             return Enderfly.this.remainingCooldownBeforeLocatingNewLightSource == 0 && !Enderfly.this.hasLightSource() && Enderfly.this.wantsToGoToALightSource();
         }
@@ -474,52 +449,57 @@ public class Enderfly extends Animal implements FlyingAnimal {
         }
 
         public void start() {
-            Enderfly.this.remainingCooldownBeforeLocatingNewLightSource = Enderfly.TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE;
-            List<BlockPos> list = this.findNearbyLightSourcesWithSpace();
-            int index = -1;
+            int validLightSourceIndex = -1;
             boolean canReach;
+
+            Enderfly.this.remainingCooldownBeforeLocatingNewLightSource = Enderfly.TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE;
+            List<BlockPos> validLightSources = this.findNearbyLightSourcesWithSpace();
             Level level = Enderfly.this.level();
 
-            if (list.isEmpty()) {
+            if (validLightSources.isEmpty()) {
                 return;
             }
+
             // Check if block can be reached
-            for (int i = 0; i < list.size(); i++) {
-                BlockPos pPos = list.get(i);
+            for (BlockPos lightSource : validLightSources) {
+                canReach = hasAirAround(level, lightSource);
 
-                canReach = level.getBlockState(pPos.above()).isAir() || level.getBlockState(pPos.below()).isAir()
-                        || level.getBlockState(pPos.north()).isAir() || level.getBlockState(pPos.south()).isAir()
-                        || level.getBlockState(pPos.east()).isAir() || level.getBlockState(pPos.west()).isAir();
-
-
-                if (canReach) {
-                    System.getLogger("Enderfly").log(System.Logger.Level.INFO, "Can reach source at " + pPos);
-                    if (index != -1) {
-                        // If there is more than one valid hive, choose the closest one
-                        if (Enderfly.this.blockPosition().distSqr(list.get(i)) < Enderfly.this.blockPosition().distSqr(list.get(index))) {
-                            index = i;
-                        }
-                    } else {
-                        index = i;
-                    }
+                if (!canReach) {
+                    continue;
+                }
+                if (validLightSourceIndex == -1) {
+                    validLightSourceIndex = validLightSources.indexOf(lightSource);
+                    continue;
+                }
+                if (Enderfly.this.blockPosition().distSqr(lightSource) < Enderfly.this.blockPosition().distSqr(validLightSources.get(validLightSourceIndex))) {
+                    validLightSourceIndex = validLightSources.indexOf(lightSource);
                 }
 
             }
 
-            if (index != -1) {
-                Enderfly.this.lightSourceBlockPos = list.get(index);
-                System.getLogger("Enderfly").log(System.Logger.Level.INFO, "Source found at " + Enderfly.this.lightSourceBlockPos);
-                Enderfly.this.navigation.moveTo(Enderfly.this.lightSourceBlockPos.getX(), Enderfly.this.lightSourceBlockPos.getY(), Enderfly.this.lightSourceBlockPos.getZ(), 1.0D);
+            if (validLightSourceIndex != -1) {
+                Enderfly.this.savedLightSourceBlockPos = validLightSources.get(validLightSourceIndex);
+                Enderfly.this.navigation.moveTo(
+                        Enderfly.this.savedLightSourceBlockPos.getX(),
+                        Enderfly.this.savedLightSourceBlockPos.getY(),
+                        Enderfly.this.savedLightSourceBlockPos.getZ(), 1.0D
+                );
             }
+        }
+
+        private static boolean hasAirAround(Level level, BlockPos blockPos) {
+            return level.getBlockState(blockPos.above()).isAir() || level.getBlockState(blockPos.below()).isAir()
+                    || level.getBlockState(blockPos.north()).isAir() || level.getBlockState(blockPos.south()).isAir()
+                    || level.getBlockState(blockPos.east()).isAir() || level.getBlockState(blockPos.west()).isAir();
         }
 
         private List<BlockPos> findNearbyLightSourcesWithSpace() {
             BlockPos blockpos = Enderfly.this.blockPosition();
             List<BlockPos> posList = Lists.newArrayList();
 
-            for (int x = -MAX_LOCATE_DISTANCE; x <= MAX_LOCATE_DISTANCE; ++x) {
-                for (int y = -MAX_LOCATE_DISTANCE; y <= MAX_LOCATE_DISTANCE; ++y) {
-                    for (int z = -MAX_LOCATE_DISTANCE; z <= MAX_LOCATE_DISTANCE; ++z) {
+            for (int x = -MAX_LOCATE_RADIUS; x <= MAX_LOCATE_RADIUS; ++x) {
+                for (int y = -MAX_LOCATE_RADIUS; y <= MAX_LOCATE_RADIUS; ++y) {
+                    for (int z = -MAX_LOCATE_RADIUS; z <= MAX_LOCATE_RADIUS; ++z) {
                         // Add if block is in LIGHT_SOURCES
                         if (LIGHT_SOURCES.contains(Enderfly.this.level().getBlockState(blockpos.offset(x, y, z)).getBlock())) {
                             posList.add(blockpos.offset(x, y, z));
@@ -545,7 +525,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
         private static final int WANDER_THRESHOLD = 22;
 
         EnderflyWanderGoal() {
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+            this.setFlags(EnumSet.of(Flag.MOVE));
         }
 
         public boolean canUse() {
@@ -566,17 +546,20 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
         @Nullable
         private Vec3 findPos() {
+            final int pRadius = 8;
+            final int pYRange = 8;
+            final int pMaxDistance = 8;
+
             Vec3 vec3;
-            if (Enderfly.this.isLightSourceValid() && !Enderfly.this.closerThan(Enderfly.this.lightSourceBlockPos, WANDER_THRESHOLD)) {
-                Vec3 vec31 = Vec3.atCenterOf(Enderfly.this.lightSourceBlockPos);
+            if (Enderfly.this.isLightSourceValid() && !Enderfly.this.closerThan(Enderfly.this.savedLightSourceBlockPos, WANDER_THRESHOLD)) {
+                Vec3 vec31 = Vec3.atCenterOf(Enderfly.this.savedLightSourceBlockPos);
                 vec3 = vec31.subtract(Enderfly.this.position()).normalize();
             } else {
                 vec3 = Enderfly.this.getViewVector(0.0F);
             }
 
-            int i = 8;
-            Vec3 vec32 = HoverRandomPos.getPos(Enderfly.this, 8, 7, vec3.x, vec3.z, ((float)Math.PI / 2F), 3, 1);
-            return vec32 != null ? vec32 : AirAndWaterRandomPos.getPos(Enderfly.this, 8, 4, -2, vec3.x, vec3.z, (double)((float)Math.PI / 2F));
+            Vec3 vec32 = HoverRandomPos.getPos(Enderfly.this, pRadius, pYRange, vec3.x, vec3.z, ((float)Math.PI / 2F), 3, 1);
+            return vec32 != null ? vec32 : AirAndWaterRandomPos.getPos(Enderfly.this, pMaxDistance, pYRange/2, -2, vec3.x, vec3.z, (double)((float)Math.PI / 2F));
         }
     }
 }

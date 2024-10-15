@@ -1,0 +1,126 @@
+{
+  "parent": "across_the_end:void_grasp_upgrade",
+  "criteria": {
+    "embrace_the_void": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "across_the_end:amethyst_infused_diamond_sword"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_diamond_pickaxe"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_diamond_axe"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_diamond_shovel"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_diamond_hoe"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_netherite_sword"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_netherite_pickaxe"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_netherite_axe"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_netherite_shovel"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_netherite_hoe"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_bow"
+            ]
+          },
+          {
+            "items": [
+              "across_the_end:amethyst_infused_crossbow"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.embrace_the_void_description"
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "item": "across_the_end:void_grasp_upgrade_smithing_template"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.embrace_the_void_title"
+    }
+  },
+  "requirements": [
+    [
+      "across_the_end:amethyst_infused_diamond_sword"
+    ],
+    [
+      "across_the_end:amethyst_infused_diamond_pickaxe"
+    ],
+    [
+      "across_the_end:amethyst_infused_diamond_axe"
+    ],
+    [
+      "across_the_end:amethyst_infused_diamond_shovel"
+    ],
+    [
+      "across_the_end:amethyst_infused_diamond_hoe"
+    ],
+    [
+      "across_the_end:amethyst_infused_netherite_sword"
+    ],
+    [
+      "across_the_end:amethyst_infused_netherite_pickaxe"
+    ],
+    [
+      "across_the_end:amethyst_infused_netherite_axe"
+    ],
+    [
+      "across_the_end:amethyst_infused_netherite_shovel"
+    ],
+    [
+      "across_the_end:amethyst_infused_netherite_hoe"
+    ],
+    [
+      "across_the_end:amethyst_infused_bow"
+    ],
+    [
+      "across_the_end:amethyst_infused_crossbow"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
