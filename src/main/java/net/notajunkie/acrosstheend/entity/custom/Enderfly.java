@@ -38,6 +38,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import net.notajunkie.acrosstheend.entity.ModEntities;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -45,8 +46,10 @@ import java.util.*;
 public class Enderfly extends Animal implements FlyingAnimal {
     public static final List<Block> LIGHT_SOURCES = Arrays.asList(
             Blocks.OCHRE_FROGLIGHT, Blocks.VERDANT_FROGLIGHT, Blocks.PEARLESCENT_FROGLIGHT, Blocks.FIRE,
-            Blocks.SHROOMLIGHT, Blocks.GLOWSTONE, Blocks.LANTERN, Blocks.SEA_LANTERN, Blocks.END_ROD
+            Blocks.LANTERN, Blocks.SEA_LANTERN, Blocks.CANDLE, Blocks.JACK_O_LANTERN,
+            Blocks.END_ROD, Blocks.GLOWSTONE, Blocks.SHROOMLIGHT, Blocks.REDSTONE_LAMP
     );
+
     public final AnimationState flyAnimationState = new AnimationState();
     private static final float maxAnimationSpeed = 2.25f;
 
@@ -65,7 +68,6 @@ public class Enderfly extends Animal implements FlyingAnimal {
         super(pEntityType, pLevel);
         this.moveControl = new FlyingMoveControl(this, 20, true);
         this.lookControl = new EnderflyLookControl(this);
-        // Can live in End dimension
 
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 16.0F);
@@ -181,7 +183,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
         } else {
             this.underWaterTicks = 0;
         }
-//
+
         if (this.underWaterTicks > 10) {
             this.hurt(this.damageSources().drown(), 0.5F);
         }
@@ -234,8 +236,8 @@ public class Enderfly extends Animal implements FlyingAnimal {
         } else {
             assert this.savedLightSourceBlockPos != null;
             BlockState blockState = this.level().getBlockState(this.savedLightSourceBlockPos);
-            // Is in LIGHT_SOURCES
-            return LIGHT_SOURCES.contains(blockState.getBlock());
+
+            return LIGHT_SOURCES.contains(blockState.getBlock()) && (blockState.getLightEmission(Enderfly.this.level(), this.savedLightSourceBlockPos) == 15);
         }
     }
 
@@ -326,7 +328,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
         }
     }
 
-    public MobType getMobType() {
+    public @NotNull MobType getMobType() {
         return MobType.UNDEFINED;
     }
 
@@ -334,7 +336,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
         return pPos.closerThan(this.blockPosition(), pDistance);
     }
 
-    abstract class BaseEnderflyGoal extends Goal {
+    abstract static class BaseEnderflyGoal extends Goal {
         public abstract boolean canEnderflyUse();
 
         public abstract boolean canEnderflyContinueToUse();
@@ -450,11 +452,9 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
         public void start() {
             int validLightSourceIndex = -1;
-            boolean canReach;
 
             Enderfly.this.remainingCooldownBeforeLocatingNewLightSource = Enderfly.TICKS_BEFORE_LOCATING_NEW_LIGHT_SOURCE;
-            List<BlockPos> validLightSources = this.findNearbyLightSourcesWithSpace();
-            Level level = Enderfly.this.level();
+            List<BlockPos> validLightSources = this.findValidLightSources();
 
             if (validLightSources.isEmpty()) {
                 return;
@@ -462,11 +462,6 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
             // Check if block can be reached
             for (BlockPos lightSource : validLightSources) {
-                canReach = hasAirAround(level, lightSource);
-
-                if (!canReach) {
-                    continue;
-                }
                 if (validLightSourceIndex == -1) {
                     validLightSourceIndex = validLightSources.indexOf(lightSource);
                     continue;
@@ -487,27 +482,42 @@ public class Enderfly extends Animal implements FlyingAnimal {
             }
         }
 
-        private static boolean hasAirAround(Level level, BlockPos blockPos) {
-            return level.getBlockState(blockPos.above()).isAir() || level.getBlockState(blockPos.below()).isAir()
-                    || level.getBlockState(blockPos.north()).isAir() || level.getBlockState(blockPos.south()).isAir()
-                    || level.getBlockState(blockPos.east()).isAir() || level.getBlockState(blockPos.west()).isAir();
-        }
-
-        private List<BlockPos> findNearbyLightSourcesWithSpace() {
-            BlockPos blockpos = Enderfly.this.blockPosition();
+        private List<BlockPos> findValidLightSources() {
+            BlockPos enderflyPos = Enderfly.this.blockPosition();
             List<BlockPos> posList = Lists.newArrayList();
+            BlockPos pBlockPos = null;
+            BlockState pBlockState = null;
 
             for (int x = -MAX_LOCATE_RADIUS; x <= MAX_LOCATE_RADIUS; ++x) {
                 for (int y = -MAX_LOCATE_RADIUS; y <= MAX_LOCATE_RADIUS; ++y) {
                     for (int z = -MAX_LOCATE_RADIUS; z <= MAX_LOCATE_RADIUS; ++z) {
-                        // Add if block is in LIGHT_SOURCES
-                        if (LIGHT_SOURCES.contains(Enderfly.this.level().getBlockState(blockpos.offset(x, y, z)).getBlock())) {
-                            posList.add(blockpos.offset(x, y, z));
+                        pBlockPos = enderflyPos.offset(x, y, z);
+                        pBlockState = Enderfly.this.level().getBlockState(pBlockPos);
+
+                        // Skip if block is not in LIGHT_SOURCES or has no Air around
+                        if (!LIGHT_SOURCES.contains(pBlockState.getBlock()) || !hasNoSolidRendererBlocksAround(Enderfly.this.level(), pBlockPos)) {
+                            continue;
                         }
+                        posList.add(pBlockPos);
                     }
                 }
             }
             return posList;
+        }
+
+        public static boolean hasNoSolidRendererBlocksAround(Level level, BlockPos blockPos) {
+            BlockState above = level.getBlockState(blockPos.above());
+            BlockState below = level.getBlockState(blockPos.below());
+            BlockState north = level.getBlockState(blockPos.north());
+            BlockState south = level.getBlockState(blockPos.south());
+            BlockState east = level.getBlockState(blockPos.east());
+            BlockState west = level.getBlockState(blockPos.west());
+
+            boolean above_below = (above.isSolidRender(level, blockPos.above()) && below.isSolidRender(level, blockPos.below()));
+            boolean north_south = (north.isSolidRender(level, blockPos.north()) && south.isSolidRender(level, blockPos.south()));
+            boolean west_east = (east.isSolidRender(level, blockPos.east()) && west.isSolidRender(level, blockPos.west()));
+
+            return !(above_below && north_south && west_east);
         }
     }
 
@@ -522,7 +532,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
     }
 
     class EnderflyWanderGoal extends Goal {
-        private static final int WANDER_THRESHOLD = 22;
+        private static final int WANDER_THRESHOLD = 18;
 
         EnderflyWanderGoal() {
             this.setFlags(EnumSet.of(Flag.MOVE));
@@ -546,9 +556,9 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
         @Nullable
         private Vec3 findPos() {
-            final int pRadius = 8;
-            final int pYRange = 8;
-            final int pMaxDistance = 8;
+            final int pRadius = 4;
+            final int pYRange = 4;
+            final int pMaxDistance = 4;
 
             Vec3 vec3;
             if (Enderfly.this.isLightSourceValid() && !Enderfly.this.closerThan(Enderfly.this.savedLightSourceBlockPos, WANDER_THRESHOLD)) {
