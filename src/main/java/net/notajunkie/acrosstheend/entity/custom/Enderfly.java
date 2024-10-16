@@ -270,7 +270,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
             public boolean isStableDestination(BlockPos p_27947_) {
                 return !this.level.getBlockState(p_27947_.below()).isAir();
             }
-            
+
             public void tick() {
                 super.tick();
             }
