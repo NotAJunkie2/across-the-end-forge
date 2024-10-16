@@ -84,7 +84,7 @@ public class Enderfly extends Animal implements FlyingAnimal {
 
     protected void registerGoals() {
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(Items.CHORUS_FRUIT), false));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(Items.POPPED_CHORUS_FRUIT), false));
         this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.25D));
         this.goalSelector.addGoal(5, new EnderflyLocateLightSourceGoal());
         this.goToLightSourceGoal = new EnderflyGoToLightSourceGoal();
