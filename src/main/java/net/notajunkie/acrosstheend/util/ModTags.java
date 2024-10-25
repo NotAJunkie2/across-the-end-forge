@@ -20,7 +20,8 @@ public class ModTags {
     public static class Items {
         public static final TagKey<Item> AMETHYST_INFUSED_DIAMOND_TOOLS = tag("amethyst_infused_diamond_tools");
         public static final TagKey<Item> AMETHYST_INFUSED_NETHERITE_TOOLS = tag("amethyst_infused_netherite_tools");
-        public static final TagKey<Item> AMETHYST_INFUSED_WEAPONS = tag("amethyst_infused_netherite_weapons");
+        public static final TagKey<Item> AMETHYST_INFUSED_WEAPONS = tag("amethyst_infused_weapons");
+
 
         private static TagKey<Item> tag(String name) {
             return ItemTags.create(new ResourceLocation(AcrossTheEnd.MOD_ID, name));

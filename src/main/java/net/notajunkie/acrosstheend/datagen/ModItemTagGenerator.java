@@ -42,6 +42,8 @@ public class ModItemTagGenerator extends ItemTagsProvider {
                 .add(ModItems.AMETHYST_INFUSED_DIAMOND_SWORD.get())
                 .add(ModItems.AMETHYST_INFUSED_BOW.get())
                 .add(ModItems.AMETHYST_INFUSED_CROSSBOW.get())
+                .add(ModItems.AMETHYST_INFUSED_DIAMOND_AXE.get())
+                .add(ModItems.AMETHYST_INFUSED_NETHERITE_AXE.get())
         ;
     }
 }

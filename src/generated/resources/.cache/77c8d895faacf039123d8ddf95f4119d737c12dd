@@ -1,4 +1,4 @@
-// 1.20.1	2024-06-03T20:16:20.6553093	Tags for minecraft:item mod id across_the_end
+// 1.20.1	2024-10-25T16:30:03.4537243	Tags for minecraft:item mod id across_the_end
 fa1c6084f9143d36a309181fa84cf6baccff11cd data/across_the_end/tags/items/amethyst_infused_diamond_tools.json
 aa42994f09886ab50618dbccd0e4744e4b4f3183 data/across_the_end/tags/items/amethyst_infused_netherite_tools.json
-1d408cd536ee9ceb145565dba62f532709ca54af data/across_the_end/tags/items/amethyst_infused_netherite_weapons.json
+aebd89a779040f5957ab6938eb7b6faa4c413082 data/across_the_end/tags/items/amethyst_infused_weapons.json

@@ -1,11 +1,11 @@
 package net.notajunkie.acrosstheend.event;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -29,7 +29,6 @@ import net.notajunkie.acrosstheend.item.ModItems;
 import net.notajunkie.acrosstheend.util.ModTags;
 
 import java.util.List;
-import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = AcrossTheEnd.MOD_ID)
 public class ModEvents {
@@ -56,13 +55,10 @@ public class ModEvents {
         BlockState blockState = event.getState();
         Level level = event.getPlayer().level();
         ServerLevel serverLevel = (ServerLevel) player.level();
+        BlockPos pos = event.getPos();
         int fortuneModifier = handItem.getEnchantmentLevel(Enchantments.BLOCK_FORTUNE);
         int silkTouchModifier = handItem.getEnchantmentLevel(Enchantments.SILK_TOUCH);
 
-        // Exit if player is in creative mode
-        if (player.isCreative()) {
-            return;
-        }
         // Exit if player is not holding an amethyst infused tool
         if (!handItem.is(ModTags.Items.AMETHYST_INFUSED_DIAMOND_TOOLS) && !handItem.is(ModTags.Items.AMETHYST_INFUSED_NETHERITE_TOOLS)) {
             return;
@@ -87,6 +83,17 @@ public class ModEvents {
 
         // Remove block
         event.getLevel().setBlock(event.getPos(), Blocks.AIR.defaultBlockState(), 1);
+
+        // Play teleportation sound
+        level.playSound((Player)null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
+        event.getLevel().playSound((Player)null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0f, 1.0f);
+
+        // Spawn particles
+        for (int i = 0; i < 20; i++) {
+            serverLevel.sendParticles(ParticleTypes.PORTAL, pos.getX(), pos.getY(), pos.getZ(), 3,
+                Math.cos(i * 10), 0.25d, Math.sin(i * 10), 0.1
+            );
+        }
     }
 
     @SubscribeEvent
@@ -94,7 +101,7 @@ public class ModEvents {
         Entity killer = event.getSource().getEntity();
 
         // Exit if killer is not a player
-        if (!(killer instanceof Player)) {
+        if (!(killer instanceof Player) || (event.getEntity() instanceof  Player)) {
             return;
         }
 
@@ -118,6 +125,9 @@ public class ModEvents {
         Entity killer = event.getSource().getEntity();
         Entity victim = event.getEntity();
         Level level = event.getEntity().level();
+        ServerLevel serverLevel = (ServerLevel) level;
+        BlockPos pos = event.getEntity().getOnPos();
+
         // Exit if killer is not a player
         if (!(killer instanceof Player)) {
             return;
@@ -132,6 +142,16 @@ public class ModEvents {
         if (xpDrop > 0) {
             level.addFreshEntity(new ExperienceOrb(level, killer.getX(), killer.getY(), killer.getZ(), xpDrop));
         }
+
+        // Play teleportation sound
+        level.playSound((Player)null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0F, 1.0F);
+
+        // Spawn particles
+        for (int i = 0; i < 20; i++) {
+            serverLevel.sendParticles(ParticleTypes.PORTAL, pos.getX(), pos.getY(), pos.getZ(), 3,
+                    Math.cos(i * 10), 0.25d, Math.sin(i * 10), 0.1
+            );
+        }
     }
 
     @SubscribeEvent
@@ -139,7 +159,7 @@ public class ModEvents {
         if (!(event.getEntity().getLastAttacker() instanceof Player)) {
             return;
         }
-        if (!((Player) event.getEntity().getLastAttacker()).getMainHandItem().is(ModTags.Items.AMETHYST_INFUSED_WEAPONS)) {
+        if (!event.getEntity().getLastAttacker().getMainHandItem().is(ModTags.Items.AMETHYST_INFUSED_WEAPONS)) {
             return;
         }
         event.setDroppedExperience(0);
